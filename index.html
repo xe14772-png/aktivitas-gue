@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#182d4d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<title>Aktivitas Gue</title>
+<style>
+:root{--navy:#182d4d;--blue:#dceeff;--cream:#fffaf0;--mint:#dff7e9;--lav:#eee7ff;--pink:#ffe7ed;--ink:#17253b;--muted:#64748b;--line:#e3e8ef;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:760px;margin:auto;padding:18px 14px 36px}
+header{background:var(--navy);color:white;border-radius:24px;padding:22px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+header:after{content:"✓";position:absolute;right:18px;top:-18px;font-size:118px;opacity:.08;font-weight:900}
+.eyebrow{font-size:12px;letter-spacing:1.8px;text-transform:uppercase;opacity:.8;font-weight:800}
+h1{font-size:29px;line-height:1.12;margin:8px 0}header p{margin:8px 0 0;color:#e0eafa;font-size:14px}
+.date{font-size:12px;margin-top:15px;color:#d4e3fb}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+.stat{background:white;border:1px solid var(--line);border-radius:16px;padding:13px 10px;text-align:center}
+.stat strong{display:block;font-size:23px;color:var(--navy)}.stat span{font-size:11px;color:var(--muted)}
+.progress-wrap{background:white;padding:15px;border-radius:17px;border:1px solid var(--line);margin-bottom:16px}
+.progress-label{display:flex;justify-content:space-between;font-size:13px;font-weight:750;margin-bottom:9px}
+.track{height:9px;background:#e8edf4;border-radius:99px;overflow:hidden}.fill{height:100%;width:0;background:#2d9464;border-radius:99px;transition:width .2s}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+button,select,input{font:inherit}
+button{border:0;border-radius:12px;padding:10px 13px;font-weight:750;cursor:pointer}
+.filter{background:#e9eef5;color:var(--navy)}.filter.active{background:var(--navy);color:white}
+section{background:white;border:1px solid var(--line);border-radius:19px;margin:13px 0;overflow:hidden}
+.section-head{padding:14px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.section-head .emoji{font-size:22px}.section-head h2{font-size:16px;margin:0}.section-head small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.items{padding:4px 14px}
+.item{display:flex;align-items:flex-start;gap:11px;padding:13px 0;border-bottom:1px solid #edf0f5}
+.item:last-child{border-bottom:0}
+.item input[type=checkbox]{appearance:none;width:22px;height:22px;border:2px solid #a9b6c7;border-radius:7px;margin:1px 0 0;flex:0 0 22px;cursor:pointer;background:white}
+.item input[type=checkbox]:checked{background:#25845a;border-color:#25845a}
+.item input[type=checkbox]:checked:after{content:"✓";display:block;color:white;font-size:15px;font-weight:900;text-align:center;line-height:18px}
+.item label{flex:1;cursor:pointer;font-size:14px;line-height:1.35}.item.done label{text-decoration:line-through;color:#8993a3}
+.item .time{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.custom{padding:15px;background:#fff}
+.custom h2{font-size:16px;margin:0 0 10px}
+.add-row{display:flex;gap:8px}.add-row input{min-width:0;flex:1;border:1px solid #d7dee8;border-radius:12px;padding:11px 12px;background:white}
+.add-row select{max-width:118px;border:1px solid #d7dee8;border-radius:12px;padding:8px;background:white}
+.add-row button{background:#25845a;color:white}
+.delete{background:transparent;color:#a1aaba;padding:2px 6px;font-size:18px}
+.empty{padding:18px;text-align:center;color:var(--muted);font-size:13px}
+.bottom{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.secondary{background:#e9eef5;color:var(--navy)}.danger{background:#ffe7ed;color:#9e2c49}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin:15px 2px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#182d4d;color:white;padding:11px 16px;border-radius:99px;font-size:13px;display:none;box-shadow:0 5px 22px #0002}
+@media(min-width:600px){.app{padding:26px 22px 40px}header{padding:27px}.items{padding:4px 18px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="eyebrow">Checklist harian · versi lo</div>
+ <h1>Aktivitas Gue ✨</h1>
+ <p>Centang yang selesai. Lihat yang belum. Pelan-pelan, yang penting jalan.</p>
+ <div class="date" id="today"></div>
+</header>
+<div class="stats">
+ <div class="stat"><strong id="total">0</strong><span>Total aktivitas</span></div>
+ <div class="stat"><strong id="completed">0</strong><span>Selesai</span></div>
+ <div class="stat"><strong id="remaining">0</strong><span>Belum selesai</span></div>
+</div>
+<div class="progress-wrap">
+ <div class="progress-label"><span>Progres hari ini</span><span id="percent">0%</span></div>
+ <div class="track"><div class="fill" id="fill"></div></div>
+</div>
+<div class="toolbar" aria-label="Filter aktivitas">
+ <button class="filter active" data-filter="all">Semua</button>
+ <button class="filter" data-filter="todo">Belum selesai</button>
+ <button class="filter" data-filter="done">Sudah selesai</button>
+</div>
+<div id="sections"></div>
+<section class="custom">
+ <h2>＋ Tambah aktivitas sendiri</h2>
+ <form class="add-row" id="addForm">
+  <input id="newActivity" maxlength="80" placeholder="Contoh: latihan 10 soal..." aria-label="Nama aktivitas" required>
+  <select id="newGroup" aria-label="Waktu aktivitas">
+   <option value="Pagi">Pagi</option><option value="Sore">Sore</option><option value="Malam">Malam</option><option value="Lainnya">Lainnya</option>
+  </select>
+  <button type="submit">Tambah</button>
+ </form>
+</section>
+<div class="bottom">
+ <button class="secondary" id="uncheck">Batalkan semua centang</button>
+ <button class="danger" id="reset">Reset checklist hari ini</button>
+</div>
+<p class="note">Data disimpan di browser pada perangkat ini. Buka file ini menggunakan browser yang sama agar checklist tetap tersimpan. Setiap tanggal baru, checklist harian kembali kosong otomatis. Semangat, bro 🤝</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const defaults = [
+ {group:"Pagi",emoji:"🌤️",subtitle:"Mulai pelan-pelan, jangan langsung buka sosmed",items:[
+  ["Bangun dan rapikan tempat tidur","06.30"],
+  ["Minum air, cuci muka, dan siap-siap","06.40"],
+  ["Olahraga ringan atau jalan kaki","07.00"],
+  ["Sarapan dan siapkan materi belajar","07.30"],
+  ["Belajar pagi — Sesi 1 (25 menit)","08.00"],
+  ["Istirahat 5 menit tanpa sosmed","08.25"],
+  ["Belajar pagi — Sesi 2 (25 menit)","08.30"],
+  ["Istirahat 5 menit tanpa sosmed","08.55"],
+  ["Belajar pagi — Sesi 3 (25 menit)","09.00"],
+  ["Istirahat akhir dan tutup blok pagi","09.25"]
+ ]},
+ {group:"Siang",emoji:"☀️",subtitle:"Isi waktu kosong tanpa kebablasan HP",items:[
+  ["Makan dan beres-beres ringan","Fleksibel"],
+  ["Istirahat / tidur siang secukupnya","Fleksibel"],
+  ["Satu kegiatan produktif tanpa HP","Fleksibel"],
+  ["Waktu hiburan pakai timer","15–20 menit"]
+ ]},
+ {group:"Sore",emoji:"🌿",subtitle:"Sesi belajar kedua",items:[
+  ["Belajar sore — Sesi 1 (25 menit)","14.00"],
+  ["Istirahat 5 menit tanpa sosmed","14.25"],
+  ["Belajar sore — Sesi 2 (25 menit)","14.30"],
+  ["Istirahat 5 menit tanpa sosmed","14.55"],
+  ["Belajar sore — Sesi 3 (25 menit)","15.00"],
+  ["Istirahat akhir dan tutup blok sore","15.25"],
+  ["Mandi / bantu pekerjaan rumah","Fleksibel"]
+ ]},
+ {group:"Malam",emoji:"🌙",subtitle:"Sesi terakhir dan persiapan besok",items:[
+  ["Belajar malam — Sesi 1 (25 menit)","19.00"],
+  ["Istirahat 5 menit tanpa sosmed","19.25"],
+  ["Belajar malam — Sesi 2 (25 menit)","19.30"],
+  ["Istirahat 5 menit tanpa sosmed","19.55"],
+  ["Belajar malam — Sesi 3 (25 menit)","20.00"],
+  ["Istirahat akhir dan tutup blok malam","20.25"],
+  ["Evaluasi hari ini selama 5 menit","Setelah belajar"],
+  ["Siapkan materi dan kebutuhan besok","Sebelum tidur"],
+  ["Jauhkan HP dari kasur saat tidur","Malam"]
+ ]}
+];
+const dateKey = () => {const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const storageKey = "aktivitas-gue-v1";
+let state;
+function load(){
+ try{state=JSON.parse(localStorage.getItem(storageKey)||"null")}catch(e){state=null}
+ if(!state || state.date!==dateKey()) state={date:dateKey(),custom:[],done:{}};
+}
+function save(){try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){}}
+let currentFilter="all";
+const sectionsEl=document.getElementById("sections");
+function allItems(){
+ const arr=[];
+ defaults.forEach(g=>g.items.forEach((it,i)=>arr.push({id:g.group+"-"+i,group:g.group,label:it[0],time:it[1]})));
+ (state.custom||[]).forEach((it,i)=>arr.push({id:"custom-"+it.id,group:it.group,label:it.label,time:"Tambahan",custom:true,customId:it.id}));
+ return arr;
+}
+function render(){
+ document.getElementById("today").textContent=new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+ const all=allItems(),complete=all.filter(x=>state.done[x.id]).length;
+ document.getElementById("total").textContent=all.length;
+ document.getElementById("completed").textContent=complete;
+ document.getElementById("remaining").textContent=all.length-complete;
+ const pct=all.length?Math.round(complete/all.length*100):0;
+ document.getElementById("percent").textContent=pct+"%";
+ document.getElementById("fill").style.width=pct+"%";
+ sectionsEl.innerHTML="";
+ const groups=defaults.map(g=>({group:g.group,emoji:g.emoji,subtitle:g.subtitle,items:all.filter(x=>x.group===g.group)}));
+ const customGroups=[...new Set((state.custom||[]).map(x=>x.group))].filter(x=>!defaults.some(g=>g.group===x)).map(group=>({group,emoji:"⭐",subtitle:"Aktivitas tambahan lo",items:all.filter(x=>x.group===group)}));
+ groups.concat(customGroups).forEach(g=>{
+  const items=g.items.filter(x=>currentFilter==="all"||(currentFilter==="done"&&state.done[x.id])||(currentFilter==="todo"&&!state.done[x.id]));
+  if(!items.length)return;
+  const sec=document.createElement("section");
+  const head=document.createElement("div");head.className="section-head";
+  head.innerHTML=`<span class="emoji">${g.emoji}</span><div><h2>${g.group}</h2><small>${g.subtitle||"Aktivitas tambahan lo"}</small></div>`;
+  const list=document.createElement("div");list.className="items";
+  items.forEach(it=>{
+   const row=document.createElement("div");row.className="item"+(state.done[it.id]?" done":"");
+   const cb=document.createElement("input");cb.type="checkbox";cb.checked=!!state.done[it.id];cb.id="c-"+it.id;
+   cb.addEventListener("change",()=>{state.done[it.id]=cb.checked;save();render();if(cb.checked)showToast("Mantap, satu langkah kelar! ✓")});
+   const label=document.createElement("label");label.htmlFor=cb.id;label.textContent=it.label;
+   const time=document.createElement("span");time.className="time";time.textContent=it.time;
+   label.appendChild(time);row.append(cb,label);
+   if(it.custom){const del=document.createElement("button");del.className="delete";del.type="button";del.textContent="×";del.title="Hapus aktivitas";del.setAttribute("aria-label","Hapus "+it.label);del.onclick=()=>{state.custom=state.custom.filter(x=>x.id!==it.customId);delete state.done[it.id];save();render()};row.appendChild(del)}
+   list.appendChild(row);
+  });
+  sec.append(head,list);sectionsEl.appendChild(sec);
+ });
+ if(!sectionsEl.children.length){const e=document.createElement("div");e.className="empty";e.textContent=currentFilter==="todo"?"Semua aktivitas beres. Keren, bro! 🎉":"Belum ada aktivitas di filter ini.";sectionsEl.appendChild(e)}
+ document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("active",b.dataset.filter===currentFilter));
+}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.style.display="block";clearTimeout(showToast.t);showToast.t=setTimeout(()=>t.style.display="none",1800)}
+document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{currentFilter=b.dataset.filter;render()}));
+document.getElementById("addForm").addEventListener("submit",e=>{
+ e.preventDefault();const input=document.getElementById("newActivity"),label=input.value.trim(),group=document.getElementById("newGroup").value;if(!label)return;
+ state.custom.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),group,label});save();input.value="";currentFilter="all";render();showToast("Aktivitas ditambahkan!");
+});
+document.getElementById("uncheck").addEventListener("click",()=>{if(confirm("Batalkan semua centang hari ini?")){state.done={};save();render();showToast("Centang direset.")}});
+document.getElementById("reset").addEventListener("click",()=>{if(confirm("Reset checklist hari ini? Aktivitas tambahan juga akan dihapus.")){state={date:dateKey(),custom:[],done:{}};save();render();showToast("Checklist direset.")}});
+load();render();
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }
+</script>
+</body>
+</html>
